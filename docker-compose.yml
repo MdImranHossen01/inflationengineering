@@ -1,0 +1,22 @@
+services:
+  web:
+    image: ${DOCKER_IMAGE_TAG:-inflationengineering-app:latest}
+    container_name: inflationengineering-app
+    restart: unless-stopped
+    ports:
+      - "3006:3000"
+    environment:
+      - NODE_OPTIONS=--max-old-space-size=125
+    env_file:
+      - .env.local
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+        reservations:
+          memory: 80M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
