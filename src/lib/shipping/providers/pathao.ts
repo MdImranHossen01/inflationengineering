@@ -352,7 +352,7 @@ export class PathaoProvider implements ShippingProvider {
         item_quantity: Number(data.item_quantity) || 1,
         item_weight: Number(data.item_weight) || 0.5,
         amount_to_collect: Math.round(Number(data.cod_amount) || 0),
-        item_description: data.item_description || data.note || 'Product Order',
+        item_description: (data as any).item_description || data.note || 'Product Order',
       };
 
       if (data.area_id && Number(data.area_id) > 0) {
