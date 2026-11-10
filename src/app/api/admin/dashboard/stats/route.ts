@@ -9,6 +9,9 @@ import Expense from '@/models/Expense';
 import Bill from '@/models/Bill';
 import SupplierBill from '@/models/SupplierBill';
 
+const statsCache = new Map<string, { timestamp: number; data: any }>();
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -41,6 +44,14 @@ export async function GET(req: NextRequest) {
       }
     }
     endDate.setHours(23, 59, 59, 999);
+
+    const cacheKey = `${startDate.toISOString().slice(0, 10)}_${endDate.toISOString().slice(0, 10)}`;
+    const cached = statsCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+      return NextResponse.json(cached.data, {
+        headers: { 'Cache-Control': 'private, no-cache, no-store, must-revalidate' }
+      });
+    }
 
     await connectToDatabase();
 
@@ -287,38 +298,40 @@ export async function GET(req: NextRequest) {
     const accountsReceivable = arResult[0]?.total || 0;
     const accountsPayable = apResult[0]?.total || 0;
 
-    return NextResponse.json(
-      {
-        stats: {
-          totalRevenue,
-          salesCount,
-          totalUsers,
-          pendingOrdersCount,
-          activeSubscribers,
-          totalWalletTokens,
-          totalCOGS,
-          totalExpenses,
-          grossProfit,
-          netProfit,
-          roas,
-          totalAdSpend,
-          newUsersCount,
-          returningUsersCount,
-          accountsReceivable,
-          accountsPayable
-        },
-        recentOrders,
-        lowStockProducts,
-        topSellingProducts,
-        topCustomers,
-        chartData
+    const responsePayload = {
+      stats: {
+        totalRevenue,
+        salesCount,
+        totalUsers,
+        pendingOrdersCount,
+        activeSubscribers,
+        totalWalletTokens,
+        totalCOGS,
+        totalExpenses,
+        grossProfit,
+        netProfit,
+        roas,
+        totalAdSpend,
+        newUsersCount,
+        returningUsersCount,
+        accountsReceivable,
+        accountsPayable
       },
-      {
-        headers: {
-          'Cache-Control': 'private, no-cache, no-store, must-revalidate'
-        }
+      recentOrders,
+      lowStockProducts,
+      topSellingProducts,
+      topCustomers,
+      chartData
+    };
+
+    // Store in short 30-sec memory cache
+    statsCache.set(cacheKey, { timestamp: Date.now(), data: responsePayload });
+
+    return NextResponse.json(responsePayload, {
+      headers: {
+        'Cache-Control': 'private, no-cache, no-store, must-revalidate'
       }
-    );
+    });
   } catch (error) {
     console.error('Dashboard Stats Error:', error);
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });

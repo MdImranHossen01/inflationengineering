@@ -76,6 +76,9 @@ const BillSchema: Schema<IBill> = new Schema(
   { timestamps: true }
 );
 
+BillSchema.index({ documentType: 1, currentBillDue: 1 });
+BillSchema.index({ invoiceNo: 1 });
+
 if (mongoose.models && mongoose.models.Bill) {
   delete (mongoose.models as any).Bill;
 }

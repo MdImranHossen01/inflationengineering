@@ -49,6 +49,8 @@ const SupplierBillSchema: Schema<ISupplierBill> = new Schema(
   { timestamps: true }
 );
 
+SupplierBillSchema.index({ dueAmount: 1 });
+
 const SupplierBill: Model<ISupplierBill> =
   mongoose.models.SupplierBill || mongoose.model<ISupplierBill>('SupplierBill', SupplierBillSchema);
 

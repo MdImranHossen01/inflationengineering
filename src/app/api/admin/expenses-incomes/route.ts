@@ -15,7 +15,6 @@ export async function GET(req: NextRequest) {
     }
 
     await connectToDatabase();
-    await cleanOrphanLedgerTransactions();
     
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');
@@ -53,7 +52,8 @@ export async function GET(req: NextRequest) {
       .populate({ path: 'bill', strictPopulate: false })
       .populate({ path: 'supplier', select: 'name phone companyName', strictPopulate: false })
       .populate({ path: 'supplierBill', strictPopulate: false })
-      .sort({ date: -1, createdAt: -1 });
+      .sort({ date: -1, createdAt: -1 })
+      .lean();
     return NextResponse.json(expenses);
   } catch (error: any) {
     console.error('Error fetching transactions:', error);

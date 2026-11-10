@@ -12,13 +12,18 @@ export async function GET(req: NextRequest) {
     }
 
     await connectToDatabase();
-    await seedLedgerAccounts();
-    await cleanOrphanLedgerTransactions();
-    await syncBillsToLedger();
+    
+    // Quick check: seed ledger accounts only once if none exist
+    const LedgerAccount = (await import('@/models/LedgerAccount')).default;
+    const accountCount = await LedgerAccount.estimatedDocumentCount();
+    if (accountCount === 0) {
+      await seedLedgerAccounts();
+    }
 
     const transactions = await LedgerTransaction.find()
       .populate('account')
-      .sort({ date: -1, _id: -1 });
+      .sort({ date: -1, _id: -1 })
+      .lean();
 
     return NextResponse.json(transactions);
   } catch (error: any) {

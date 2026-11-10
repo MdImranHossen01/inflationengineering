@@ -25,6 +25,9 @@ const LedgerTransactionSchema: Schema<ILedgerTransaction> = new Schema(
   { timestamps: true }
 );
 
+LedgerTransactionSchema.index({ date: -1, _id: -1 });
+LedgerTransactionSchema.index({ account: 1, date: -1 });
+
 const LedgerTransaction: Model<ILedgerTransaction> =
   mongoose.models.LedgerTransaction || mongoose.model<ILedgerTransaction>('LedgerTransaction', LedgerTransactionSchema);
 
