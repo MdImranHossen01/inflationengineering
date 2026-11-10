@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import connectToDatabase from '@/lib/db';
 import Banner from '@/models/Banner';
 import { auth } from '@/auth';
 import mongoose from 'mongoose';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 export async function PUT(
   req: NextRequest,
@@ -27,6 +29,10 @@ export async function PUT(
     if (!banner) {
       return NextResponse.json({ message: 'Banner not found' }, { status: 404 });
     }
+
+    revalidatePath('/', 'layout');
+    revalidateTag('banners', 'max');
+    purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json(banner);
   } catch (error) {
@@ -57,6 +63,19 @@ export async function DELETE(
     if (!banner) {
       return NextResponse.json({ message: 'Banner not found' }, { status: 404 });
     }
+
+    if (banner.image) {
+      try {
+        const { deleteFromR2 } = await import('@/lib/r2');
+        await deleteFromR2(banner.image);
+      } catch (err) {
+        console.error('Failed to delete banner image from R2:', err);
+      }
+    }
+
+    revalidatePath('/', 'layout');
+    revalidateTag('banners', 'max');
+    purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json({ message: 'Banner deleted successfully' });
   } catch (error) {

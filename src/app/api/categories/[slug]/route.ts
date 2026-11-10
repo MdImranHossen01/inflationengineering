@@ -6,6 +6,7 @@ import connectToDatabase from '@/lib/db';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
 import { auth } from '@/auth';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 // GET a single category
 export async function GET(
@@ -72,7 +73,9 @@ export async function PUT(
     }
 
     await revalidateTag('categories', 'max');
-    revalidatePath('/');
+    revalidatePath('/', 'layout');
+    revalidatePath('/shop', 'page');
+    purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json(updatedCategory);
   } catch (error) {
@@ -125,8 +128,19 @@ export async function DELETE(
       });
 
       try {
+        if (category.image) {
+          try {
+            const { deleteFromR2 } = await import('@/lib/r2');
+            await deleteFromR2(category.image);
+          } catch (r2Err) {
+            console.error('Failed to delete category image from R2:', r2Err);
+          }
+        }
+
         await revalidateTag('categories', 'max');
-        revalidatePath('/');
+        revalidatePath('/', 'layout');
+        revalidatePath('/shop', 'page');
+        purgeCloudflareCache().catch(() => {});
       } catch (e) {
         console.error('Revalidation error:', e);
       }

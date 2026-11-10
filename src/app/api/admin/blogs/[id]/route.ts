@@ -4,6 +4,7 @@ import connectToDatabase from '@/lib/db';
 import Blog from '@/models/Blog';
 import { auth } from '@/auth';
 import mongoose from 'mongoose';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 export async function GET(
   req: NextRequest,
@@ -90,6 +91,7 @@ export async function PUT(
       revalidatePath('/blog');
       revalidatePath(`/blog/${blog.slug}`);
       revalidateTag('blogs', 'max');
+      purgeCloudflareCache().catch(() => {});
     } catch (revalidateError) {
       console.error('[Admin Blog Update revalidatePath] error:', revalidateError);
     }
@@ -124,12 +126,22 @@ export async function DELETE(
       return NextResponse.json({ message: 'Blog not found' }, { status: 404 });
     }
 
+    if (blog.thumbnail) {
+      try {
+        const { deleteFromR2 } = await import('@/lib/r2');
+        await deleteFromR2(blog.thumbnail);
+      } catch (err) {
+        console.error('Failed to delete blog thumbnail from R2:', err);
+      }
+    }
+
     // Revalidate paths after deletion
     try {
       revalidatePath('/');
       revalidatePath('/blog');
       revalidatePath(`/blogs/${blog.slug}`);
       revalidateTag('blogs', 'max');
+      purgeCloudflareCache().catch(() => {});
     } catch (revalidateError) {
       console.error('[Admin Blog Delete revalidatePath] error:', revalidateError);
     }
