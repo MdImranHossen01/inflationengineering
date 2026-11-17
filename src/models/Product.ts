@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
+import './Category';
 export interface IProduct extends Document {
   name: string;
   slug: string;

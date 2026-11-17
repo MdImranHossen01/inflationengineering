@@ -1,5 +1,7 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
 
+import './Supplier';
+import './LedgerAccount';
 export interface ISupplierBillItem {
   name: string;
   quantity: number;
