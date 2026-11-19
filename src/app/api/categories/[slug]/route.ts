@@ -75,7 +75,7 @@ export async function PUT(
     await revalidateTag('categories', 'max');
     revalidatePath('/', 'layout');
     revalidatePath('/shop', 'page');
-    purgeCloudflareCache().catch(() => {});
+    await purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json(updatedCategory);
   } catch (error) {
@@ -140,7 +140,7 @@ export async function DELETE(
         await revalidateTag('categories', 'max');
         revalidatePath('/', 'layout');
         revalidatePath('/shop', 'page');
-        purgeCloudflareCache().catch(() => {});
+        await purgeCloudflareCache().catch(() => {});
       } catch (e) {
         console.error('Revalidation error:', e);
       }

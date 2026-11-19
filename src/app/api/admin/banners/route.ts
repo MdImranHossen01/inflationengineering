@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import Banner from '@/models/Banner';
 import { auth } from '@/auth';
+import { purgeCloudflareCache } from '@/lib/cloudflareCache';
 
 export async function GET() {
   try {
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
     };
 
     const banner = await Banner.create(whitelistedBanner);
+    await purgeCloudflareCache().catch(() => {});
     return NextResponse.json(banner, { status: 201 });
   } catch (error) {
     console.error('Create Banner Error:', error);

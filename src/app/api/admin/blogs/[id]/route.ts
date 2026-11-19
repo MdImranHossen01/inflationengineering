@@ -91,7 +91,7 @@ export async function PUT(
       revalidatePath('/blog');
       revalidatePath(`/blog/${blog.slug}`);
       revalidateTag('blogs', 'max');
-      purgeCloudflareCache().catch(() => {});
+      await purgeCloudflareCache().catch(() => {});
     } catch (revalidateError) {
       console.error('[Admin Blog Update revalidatePath] error:', revalidateError);
     }
@@ -141,7 +141,7 @@ export async function DELETE(
       revalidatePath('/blog');
       revalidatePath(`/blogs/${blog.slug}`);
       revalidateTag('blogs', 'max');
-      purgeCloudflareCache().catch(() => {});
+      await purgeCloudflareCache().catch(() => {});
     } catch (revalidateError) {
       console.error('[Admin Blog Delete revalidatePath] error:', revalidateError);
     }

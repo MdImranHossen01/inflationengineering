@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Purge Cloudflare Edge cache globally
-    purgeCloudflareCache().catch(() => {});
+    await purgeCloudflareCache().catch(() => {});
 
     return NextResponse.json({ message: 'Revalidation successful' });
   } catch (error: any) {
