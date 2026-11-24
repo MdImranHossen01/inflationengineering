@@ -29,12 +29,15 @@ export default function NavbarV5() {
   const settings = useSettings();
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>(() =>
+    Array.isArray(settings?.categories) ? settings.categories.filter((c: any) => c.isActive && !c.parentCategory) : []
+  );
   const [profile, setProfile] = useState<any>(null);
   const cartItemsCount = useAppSelector((state) => state.cart.items.reduce((total, item) => total + item.quantity, 0));
   const wishlistCount = useAppSelector((state) => state.wishlist.items.length);
 
   useEffect(() => {
+    if (Array.isArray(settings?.categories)) { setCategories(settings.categories.filter((c: any) => c.isActive && !c.parentCategory)); return; }
     fetch('/api/categories')
       .then(res => res.json())
       .then(data => setCategories(data.filter((c: any) => c.isActive && !c.parentCategory)))

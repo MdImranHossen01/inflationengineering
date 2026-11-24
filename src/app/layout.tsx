@@ -40,7 +40,7 @@ import { generateOrganizationSchema } from "@/lib/seo";
 import FacebookPixel from "./components/FacebookPixel";
 import TikTokPixel from "./components/TikTokPixel";
 import { headers } from "next/headers";
-import { getCachedSettings } from "@/lib/data-fetching";
+import { getCachedSettings, getCachedCategories } from "@/lib/data-fetching";
 
 
 const geistSans = Geist({
@@ -245,7 +245,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getCachedSettings();
+  const [rawSettings, cachedCategories] = await Promise.all([
+    getCachedSettings(),
+    getCachedCategories(),
+  ]);
+  const settings = rawSettings
+    ? { ...rawSettings, categories: cachedCategories || [] }
+    : { categories: cachedCategories || [] };
 
   let jsonLd = null;
   try {
