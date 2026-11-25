@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { getCachedBlogs, getCachedSettings } from '@/lib/data-fetching';
 import { BlogListingSelector } from '@/components/templates/ServerRegistry';
 
+export const revalidate = 31536000;
+
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getCachedSettings();
   const brandName = settings?.brandName || 'Inflation Engineering';
@@ -32,12 +34,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function BlogListingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; q?: string }>;
-}) {
-  const { page = '1', q = '' } = await searchParams;
+export default async function BlogListingPage() {
+  const page = '1';
+  const q = '';
 
   // Safe page parsing and clamping
   const parsedPage = parseInt(page, 10);
