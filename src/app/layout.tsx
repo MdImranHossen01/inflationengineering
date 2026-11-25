@@ -39,7 +39,6 @@ import { ScrollProgress } from "@/components/layout/ScrollProgress";
 import { generateOrganizationSchema } from "@/lib/seo";
 import FacebookPixel from "./components/FacebookPixel";
 import TikTokPixel from "./components/TikTokPixel";
-import { headers } from "next/headers";
 import { getCachedSettings, getCachedCategories } from "@/lib/data-fetching";
 
 
@@ -175,12 +174,15 @@ const jost = Jost({
   subsets: ["latin"],
 });
 
-export const dynamic = 'force-dynamic';
-
 export async function generateMetadata(): Promise<Metadata> {
-  const headersList = await headers();
-  const hostname = headersList.get('host') || 'localhost';
-  const baseUrl = `https://${hostname}`;
+  const rawSiteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : 'http://localhost:3000');
+  const baseUrl = rawSiteUrl.startsWith('http') ? rawSiteUrl : `https://${rawSiteUrl}`;
 
   try {
     const settings = await getCachedSettings();
