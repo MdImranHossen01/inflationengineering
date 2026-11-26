@@ -280,9 +280,6 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${poppins.variable} ${roboto.variable} ${montserrat.variable} ${playfair.variable} ${outfit.variable} ${lora.variable} ${manrope.variable} ${urbanist.variable} ${orbitron.variable} ${openSans.variable} ${lato.variable} ${oswald.variable} ${raleway.variable} ${nunito.variable} ${ubuntu.variable} ${merriweather.variable} ${kanit.variable} ${quicksand.variable} ${josefinSans.variable} ${syne.variable} ${spaceGrotesk.variable} ${jost.variable} ${themeClass} ${fontClass} ${logoFontClass}`} suppressHydrationWarning>
       <head>
-        <link rel="preload" as="image" href="/assets/login_banner_v2.webp" />
-        <link rel="preload" as="image" href="/assets/register_banner_v2.webp" />
-        <link rel="preload" as="image" href="/assets/forgetpassrod.webp" />
       </head>
       <body
         className="antialiased min-h-full flex flex-col overflow-x-hidden font-sans"
