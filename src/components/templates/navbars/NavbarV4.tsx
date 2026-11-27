@@ -127,7 +127,7 @@ export default function NavbarV4() {
 
           {/* User & Global Cart Actions */}
           <div className="flex items-center gap-4 md:gap-8 ml-auto lg:ml-0">
-            <Link
+            <Link prefetch={false}
               href="/dashboard/wishlist"
               aria-label="Wishlist"
               className="relative group hidden sm:flex items-center gap-3 hover:scale-110 transition-all"
@@ -186,12 +186,12 @@ export default function NavbarV4() {
                     {(session.user as any)?.role === 'super_admin' && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/admin/dashboard" className="cursor-pointer">
+                          <Link prefetch={false} href="/admin/dashboard" className="cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" /> Admin Dashboard
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/admin/system-design" className="cursor-pointer">
+                          <Link prefetch={false} href="/admin/system-design" className="cursor-pointer">
                             <Settings className="mr-2 h-4 w-4" /> Infrastructure & Marketing
                           </Link>
                         </DropdownMenuItem>
@@ -201,12 +201,12 @@ export default function NavbarV4() {
                     {(session.user as any)?.role === 'admin' && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/admin/dashboard" className="cursor-pointer">
+                          <Link prefetch={false} href="/admin/dashboard" className="cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" /> Admin Dashboard
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/admin/orders" className="cursor-pointer">
+                          <Link prefetch={false} href="/admin/orders" className="cursor-pointer">
                             <Truck className="mr-2 h-4 w-4" /> Manage Orders
                           </Link>
                         </DropdownMenuItem>
@@ -216,7 +216,7 @@ export default function NavbarV4() {
                     {(session.user as any)?.role === 'user' && (
                       <>
                         <DropdownMenuItem asChild>
-                          <Link href="/dashboard" className="cursor-pointer">
+                          <Link prefetch={false} href="/dashboard" className="cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                           </Link>
                         </DropdownMenuItem>
@@ -235,7 +235,7 @@ export default function NavbarV4() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="flex items-center gap-3 group hover:scale-110 transition-all">
+              <Link prefetch={false} href="/login" className="flex items-center gap-3 group hover:scale-110 transition-all">
                 <div className="h-11 w-11 rounded-xl bg-transparent flex items-center justify-center transition-all border-none">
                   <User className="h-5 w-5 group-hover:text-primary transition-colors" />
                 </div>
