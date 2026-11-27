@@ -15,6 +15,54 @@ export async function GET(req: NextRequest) {
     }
 
     await connectToDatabase();
+
+    // Auto-sync any paid client bills (e.g. upfront/legacy bills) that don't yet have an Income record
+    try {
+      const paidBills = await Bill.find({
+        $or: [{ documentType: 'bill' }, { documentType: { $exists: false } }],
+        cashIn: { $gt: 0 },
+      }).lean();
+
+      if (paidBills.length > 0) {
+        const existingBillExpenses = await Expense.find({
+          type: 'income',
+          $or: [
+            { bill: { $in: paidBills.map((b: any) => b._id) } },
+            { invoiceNo: { $in: paidBills.map((b: any) => b.invoiceNo).filter(Boolean) } },
+            { reference: { $in: paidBills.map((b: any) => b.invoiceNo).filter(Boolean) } },
+          ],
+        })
+          .select('bill invoiceNo reference')
+          .lean();
+
+        const syncedBillIds = new Set(existingBillExpenses.map((e: any) => e.bill?.toString()).filter(Boolean));
+        const syncedInvoices = new Set(
+          existingBillExpenses.flatMap((e: any) => [e.invoiceNo, e.reference]).filter(Boolean)
+        );
+
+        const missingEntries = paidBills
+          .filter((b: any) => !syncedBillIds.has(b._id.toString()) && !syncedInvoices.has(b.invoiceNo))
+          .map((b: any) => ({
+            title: `Bill Payment: ${b.invoiceNo} - ${b.clientName}`,
+            amount: Number(b.cashIn) || 0,
+            category: 'Receive Client Bill',
+            type: 'income',
+            date: b.date || b.createdAt || new Date(),
+            description: `Received payment from ${b.clientName} for Bill #${b.invoiceNo}`,
+            reference: b.invoiceNo,
+            bill: b._id,
+            invoiceNo: b.invoiceNo,
+            accountCode: 'CASH',
+          }))
+          .filter((e: any) => e.amount > 0);
+
+        if (missingEntries.length > 0) {
+          await Expense.insertMany(missingEntries);
+        }
+      }
+    } catch (syncErr) {
+      console.error('Error syncing paid bills to expenses-incomes:', syncErr);
+    }
     
     const { searchParams } = new URL(req.url);
     const category = searchParams.get('category');

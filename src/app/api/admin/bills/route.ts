@@ -190,6 +190,21 @@ export async function POST(req: NextRequest) {
             `Upfront payment credit for Bill ${invoiceNo}`,
             invoiceNo
           );
+
+          // Record upfront payment in Expenses & Incomes
+          const Expense = (await import('@/models/Expense')).default;
+          await Expense.create({
+            title: `Bill Payment: ${invoiceNo} - ${clientName}`,
+            amount: cashIn,
+            category: 'Receive Client Bill',
+            type: 'income',
+            date: new Date(),
+            description: `Received upfront payment from ${clientName} for Bill #${invoiceNo}`,
+            reference: invoiceNo,
+            bill: newBill._id,
+            invoiceNo,
+            accountCode: 'CASH',
+          });
         }
       } catch (err) {
         console.error('Error logging to ledger:', err);
